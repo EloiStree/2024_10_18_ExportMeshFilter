@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -130,4 +131,89 @@ public class BasicMeshExporter
         writer.Write(vector.z);
     }
 
+    public static void ImportMeshAsOBJ(out Mesh mesh, string path)
+    {
+        mesh = new Mesh();
+        mesh.Clear();
+
+        if (!File.Exists(path))
+        {
+            Debug.LogError($"File not found: {path}");
+            return;
+        }
+
+        List<Vector3> vertices = new List<Vector3>();
+        List<Vector3> normals = new List<Vector3>();
+        List<Vector2> uvs = new List<Vector2>();
+        List<int> triangles = new List<int>();
+
+        // Read the OBJ file line by line
+        foreach (var line in File.ReadAllLines(path))
+        {
+            string[] tokens = line.Split(new[] { ' ' }, System.StringSplitOptions.RemoveEmptyEntries);
+            if (tokens.Length == 0) 
+                continue;
+
+            switch (tokens[0])
+            {
+                case "v": // Vertex
+                    if (tokens.Length >= 4)
+                    {
+                        float x = float.Parse(tokens[1]);
+                        float y = float.Parse(tokens[2]);
+                        float z = float.Parse(tokens[3]);
+                        vertices.Add(new Vector3(x, y, z));
+                    }
+                    break;
+
+                case "vn": // Normal
+                    if (tokens.Length >= 4)
+                    {
+                        float x = float.Parse(tokens[1]);
+                        float y = float.Parse(tokens[2]);
+                        float z = float.Parse(tokens[3]);
+                        normals.Add(new Vector3(x, y, z));
+                    }
+                    break;
+
+                case "vt": // Texture Coordinate
+                    if (tokens.Length >= 3)
+                    {
+                        float u = float.Parse(tokens[1]);
+                        float v = float.Parse(tokens[2]);
+                        uvs.Add(new Vector2(u, v));
+                    }
+                    break;
+
+                case "f": // Face
+                    if (tokens.Length >= 4)
+                    {
+                        for (int i = 1; i < tokens.Length; i++)
+                        {
+                            string[] faceTokens = tokens[i].Split('/');
+                            int vertexIndex = int.Parse(faceTokens[0]) - 1; // OBJ uses 1-based indexing
+                            triangles.Add(vertexIndex);
+
+                            if (faceTokens.Length > 1 && !string.IsNullOrEmpty(faceTokens[1])) // UV
+                            {
+                                // Handle UV if necessary
+                            }
+
+                            if (faceTokens.Length > 2 && !string.IsNullOrEmpty(faceTokens[2])) // Normal
+                            {
+                                // Handle normal if necessary
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
+
+        mesh.vertices = vertices.ToArray();
+        mesh.normals = normals.ToArray();
+        mesh.uv = uvs.ToArray();
+        mesh.triangles = triangles.ToArray();
+
+        mesh.RecalculateNormals();
+    }
 }
