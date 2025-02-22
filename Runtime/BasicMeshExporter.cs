@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using UnityEngine;
 
 public class BasicMeshExporter
@@ -8,28 +9,27 @@ public class BasicMeshExporter
     public static void SaveMeshAsOBJ(Mesh mesh, string filePath)
     {
         CreateDirectory(filePath);
-        StreamWriter writer = new StreamWriter(filePath);
-
-        writer.WriteLine("# Unity3D Mesh Exporter");
+        StringBuilder builder = new StringBuilder();
+        builder.AppendLine("# Unity3D Mesh Exporter");
 
         // Write vertices
         foreach (Vector3 v in mesh.vertices)
         {
             Vector3 worldV = (v); // To keep mesh in world position
-            writer.WriteLine("v " + worldV.x + " " + worldV.y + " " + worldV.z);
+            builder.AppendLine("v " + worldV.x + " " + worldV.y + " " + worldV.z);
         }
 
         // Write normals
         foreach (Vector3 n in mesh.normals)
         {
             Vector3 worldN = (n); // Transform normals
-            writer.WriteLine("vn " + worldN.x + " " + worldN.y + " " + worldN.z);
+            builder.AppendLine("vn " + worldN.x + " " + worldN.y + " " + worldN.z);
         }
 
         // Write UVs
         foreach (Vector2 uv in mesh.uv)
         {
-            writer.WriteLine("vt " + uv.x + " " + uv.y);
+            builder.AppendLine("vt " + uv.x + " " + uv.y);
         }
 
         // Write faces
@@ -38,10 +38,10 @@ public class BasicMeshExporter
             int idx0 = mesh.triangles[i] + 1;
             int idx1 = mesh.triangles[i + 1] + 1;
             int idx2 = mesh.triangles[i + 2] + 1;
-            writer.WriteLine("f " + idx0 + "/" + idx0 + "/" + idx0 + " " + idx1 + "/" + idx1 + "/" + idx1 + " " + idx2 + "/" + idx2 + "/" + idx2);
+            builder.AppendLine("f " + idx0 + "/" + idx0 + "/" + idx0 + " " + idx1 + "/" + idx1 + "/" + idx1 + " " + idx2 + "/" + idx2 + "/" + idx2);
         }
 
-        writer.Close();
+        File.WriteAllText(filePath, builder.ToString().Replace(",","."));
         Debug.Log("Mesh exported to " + filePath);
     }
 
