@@ -2,7 +2,7 @@
     "name": "be.elab.exportmesh",
     "rootNamespace": "",
     "references": [
-        "be.elab.pathtypereadwrite"
+        "be.elab.pathtype"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
